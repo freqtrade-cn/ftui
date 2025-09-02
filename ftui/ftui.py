@@ -21,6 +21,7 @@ import argparse
 import logging
 import sys
 from datetime import datetime, timedelta, timezone
+import traceback
 
 import pandas as pd
 from textual import work
@@ -422,10 +423,13 @@ def setup(args):
                     pool_connections=pool_connections,
                     pool_maxsize=pool_maxsize,
                 )
-
                 client_dict[ftui_client.name] = ftui_client
             except Exception as e:
-                raise RuntimeError("Cannot create freqtrade client") from e
+                with open("errors.log", "a") as log_file:
+                    log_file.write(f"Error creating client {s.get('name', s.get('port', 'unknown'))}: {str(e)}\n")
+                    log_file.write(traceback.format_exc())
+                    log_file.write("\n")
+                continue  # 跳过出错的 client
     else:
         if config is not None:
             try:
@@ -436,7 +440,10 @@ def setup(args):
                 )
                 client_dict[ftui_client.name] = ftui_client
             except Exception as e:
-                raise RuntimeError("Cannot create freqtrade client") from e
+                with open("errors.log", "a") as log_file:
+                    log_file.write(f"Error creating client from config: {str(e)}\n")
+                    log_file.write(traceback.format_exc())
+                    log_file.write("\n")
         else:
             raise RuntimeError("No config or YAML file specified")
 

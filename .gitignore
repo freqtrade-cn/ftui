@@ -132,3 +132,4 @@ dmypy.json
 *.yaml
 *.yml
 !example.yaml
+.DS_Store
